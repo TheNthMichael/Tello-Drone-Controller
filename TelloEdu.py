@@ -129,10 +129,13 @@ def start_drone():
                         diff = cmx - (width // 2)
                         # sign = diff / abs(diff)
                         output = pid.output(diff)
-                        sign = 1
-                        if output != 0:
-                            sign = output / abs(output)
-                        controller.yaw = sign * myExp(abs(output))
+                        if abs(diff) > 50:
+                            sign = 1
+                            if output != 0:
+                                sign = output / abs(output)
+                            controller.yaw = sign * myExp(abs(output))
+                        else:
+                            controller.yaw = 0
                         if not ret:
                             state_machine.state_change(0)
                         drone.move_drone(controller)
