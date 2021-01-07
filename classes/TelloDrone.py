@@ -66,10 +66,10 @@ class TelloDrone:
     drones constant speed
     """
     def move_drone(self, controller):
-        self.drone.send_rc_control(controller.left_right * controller.speed,
-                                   controller.forward_backward * controller.speed,
-                                   controller.up_down * controller.speed,
-                                   controller.yaw * controller.speed)
+        self.drone.send_rc_control(int(controller.left_right * controller.speed),
+                                   int(controller.forward_backward * controller.speed),
+                                   int(controller.up_down * controller.speed),
+                                   int(controller.yaw * controller.speed))
 
     """
     Lands the drone and turns off
