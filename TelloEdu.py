@@ -7,6 +7,7 @@ from TelloDrone import TelloDrone
 from Controller import Controller
 from DroneState import States, StateMachine
 from Face import Face
+from Pid import Pid
 
 """
 Creates a face object to be tracked
@@ -30,6 +31,8 @@ def start_drone():
     controller = Controller()
 
     state_machine = StateMachine()
+
+    pid = Pid(1,1,1, 1.0/30)
 
     pygame.init()
     size = width, height = 720, 600
@@ -124,12 +127,12 @@ def start_drone():
                         img = cv2.circle(img, ( cmx, cmy), 15, myFace.colors[0].tolist(), -1)
                         img = cv2.rectangle(img, (int(myFace.x),int(myFace.y) ), (int(myFace.x + myFace.w), int(myFace.y + myFace.h) ), (255,100,100), 2)
                         diff = cmx - (width // 2)
-                        if diff < 30:
-                            controller.yaw = -1 * myExp(abs(diff))
-                        elif cmx - (width // 2) > 30:
-                            controller.yaw = myExp(abs(diff))
-                        else:
-                            controller.yaw = 0
+                        # sign = diff / abs(diff)
+                        output = pid.output(diff)
+                        sign = 1
+                        if output != 0:
+                            sign = output / abs(output)
+                        controller.yaw = sign * myExp(abs(output))
                         if not ret:
                             state_machine.state_change(0)
                         drone.move_drone(controller)
