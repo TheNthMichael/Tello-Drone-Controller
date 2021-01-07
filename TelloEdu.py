@@ -1,4 +1,5 @@
 import sys, pygame
+sys.path.append('./classes')
 import cv2
 import numpy
 import math
@@ -48,7 +49,7 @@ def start_drone():
     print(drone.drone.query_battery())
 
     drone_active = True
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
     myFace = None
     last_I = None
 
