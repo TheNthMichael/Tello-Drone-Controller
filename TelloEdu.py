@@ -29,6 +29,7 @@ def start_drone():
     drone.change_video_settings(720, 600)
 
     controller = Controller()
+    controller.yaw_speed = 70
 
     state_machine = StateMachine()
 
@@ -36,7 +37,7 @@ def start_drone():
 
     pygame.init()
     size = width, height = 720, 600
-    screen = pygame.display.set_mode(size)
+    screen = pygame.display.set_mode((size))
     img = pygame.Surface((width, height))
 
     features = dict(maxCorners=500,
