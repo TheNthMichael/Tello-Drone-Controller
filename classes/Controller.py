@@ -11,7 +11,8 @@ class Controller:
     _instance = None
     def __init__(self):
         if Controller._instance is None:
-            self.mov_vector = [0,0,0,0]
+            self.mov_vector = [0, 0, 0, 0]
+            self.spd_vector = [60, 60, 60, 60]
             self.spd = 60
             self.switch = {
                     pygame.K_w : (0, 1),
@@ -96,7 +97,7 @@ class Controller:
     
     @yaw.setter
     def yaw(self, dir):
-        if dir > 1 or dir < -1:
+        if dir >= 1 or dir <= -1:
             raise Exception("Error, direction can be of magnitude 1")
         self.mov_vector[3] = dir
 
@@ -111,4 +112,48 @@ class Controller:
                             between 0 and 100")
         self.spd = value
     
+    # speed vector getters /setters
+
+    @property
+    def forward_backward_speed(self):
+        return self.spd_vector[0]
+
+    @forward_backward_speed.setter
+    def forward_backward_speed(self, value):
+        if value > 100 or value < 0:
+            raise Exception("Error speed must be a value\
+                            between 0 and 100")
+        self.spd_vector[0] = value
     
+    @property
+    def left_right_speed(self):
+        return self.spd_vector[1]
+    
+    @left_right_speed.setter
+    def left_right_speed(self, value):
+        if value > 100 or value < 0:
+            raise Exception("Error speed must be a value\
+                            between 0 and 100")
+        self.spd_vector[1] = value
+    
+    @property
+    def up_down_speed(self):
+        return self.spd_vector[2]
+
+    @up_down_speed.setter
+    def up_down_speed(self, value):
+        if value > 100 or value < 0:
+            raise Exception("Error speed must be a value\
+                            between 0 and 100")
+        self.spd_vector[2] = value
+    
+    @property
+    def yaw_speed(self):
+        return self.spd_vector[3]
+    
+    @yaw_speed.setter
+    def yaw_speed(self, value):
+        if value > 100 or value < 0:
+            raise Exception("Error speed must be a value\
+                            between 0 and 100")
+        self.spd_vector[3] = value
