@@ -16,7 +16,7 @@ def start():
     drone = TelloDrone()
     drone.changeVideoSettings(720, 600)
 
-    state = DroneState.Waiting()
+    stateMachine = StateMachine()
 
     pygame.init()
     size = width, height = 720, 600
@@ -25,18 +25,20 @@ def start():
 
     print(drone.query_battery())
 
-    while state.state_type != DroneState.States.EXIT:
+    if (drone.query_battery() < 10):
+        print('Error Battery Too Low...')
+        raise Exception('Error Battery Too Low')
+
+    while stateMachine.isNotExit():
         # check for pygame events
         eventList = pygame.event.get()
         try:
-            tmp_state = state.action(drone, eventList)
-            if tmp_state != None:
-                state.clean()
-                state = tmp_state
+            stateMachine.run(drone, eventList)
         except:
             print('-- TRACKING FAILED --')
-            state.clean()
-            state = state.change(DroneState.States.EXIT)
+            drone._spd = 0
+            stateMachine.forceExit()
+            drone.turnOff()
             raise
     drone.turnOff()
     cv2.destroyAllWindows()

@@ -93,7 +93,11 @@ class TelloDrone(Tello, Controller):
         self._droneData.BATTERY = self.get_battery()
         self._droneData.DIST_TOF = self.get_distance_tof()
         self._droneData.FLIGHT_TIME = self.get_flight_time()
+        # if we fail to get a new frame, use the old one
+        tmp_frame = self._droneData.FRAME
         self._droneData.FRAME = self.getFrame()
+        if self._droneData.FRAME is None:
+            self._droneData.FRAME = tmp_frame
 
     def getData(self):
         self.updateData()
