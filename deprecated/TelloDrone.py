@@ -20,11 +20,12 @@ class DroneData:
         self.FLIGHT_TIME = 0
         self.FRAME = None
 
-class TelloDrone(Tello, Controller):
+class TelloDrone:
     _instance = None
     def __init__(self):
         if TelloDrone._instance == None:
-            super().__init__()
+            self._drone = Tello()
+            self._controller = Controller()
             self._droneData = DroneData()
             self.connect()
             self._width = 360
@@ -40,11 +41,11 @@ class TelloDrone(Tello, Controller):
     send_rc_control to move
     """
     def resetSpeed(self):
-        self.for_back_velocity = 0
-        self.left_right_velocity = 0
-        self.up_down_velocity = 0
-        self.yaw_velocity = 0
-        self.speed = 0
+        self._drone.for_back_velocity = 0
+        self._drone.left_right_velocity = 0
+        self._drone.up_down_velocity = 0
+        self._drone.yaw_velocity = 0
+        self._drone.speed = 0
     
     """
     calls the djitellopy commands
@@ -52,8 +53,8 @@ class TelloDrone(Tello, Controller):
     and turn it back on.
     """
     def streamReset(self):
-        self.streamoff()
-        self.streamon()
+        self._drone.streamoff()
+        self._drone.streamon()
 
     
     """
@@ -63,9 +64,9 @@ class TelloDrone(Tello, Controller):
     reset the video stream
     """
     def connect(self):
-        super(TelloDrone, self).connect()
+        self._drone.connect()
         self.resetSpeed()
-        print(self.get_battery)
+        print(self._drone.get_battery())
         self.streamReset()
 
     def changeVideoSize(self, width, height):
@@ -74,25 +75,25 @@ class TelloDrone(Tello, Controller):
 
     def updateData(self):
         self._droneData.ACC = (
-            self.get_acceleration_x(),
-            self.get_acceleration_y(),
-            self.get_acceleration_z()
+            self._drone.get_acceleration_x(),
+            self._drone.get_acceleration_y(),
+            self._drone.get_acceleration_z()
         )
         self._droneData.SPD = (
-            self.get_speed_x,
-            self.get_speed_y,
-            self.get_speed_z
+            self._drone.get_speed_x,
+            self._drone.get_speed_y,
+            self._drone.get_speed_z
         )
         self._droneData.ROTATION = (
-            self.get_pitch(),
-            self.get_roll(),
-            self.get_yaw()
+            self._drone.get_pitch(),
+            self._drone.get_roll(),
+            self._drone.get_yaw()
         )
-        self._droneData.BAR_HEIGHT = self.get_barometer()
-        self._droneData.HEIGHT = self.get_height()
-        self._droneData.BATTERY = self.get_battery()
-        self._droneData.DIST_TOF = self.get_distance_tof()
-        self._droneData.FLIGHT_TIME = self.get_flight_time()
+        self._droneData.BAR_HEIGHT = self._drone.get_barometer()
+        self._droneData.HEIGHT = self._drone.get_height()
+        self._droneData.BATTERY = self._drone.get_battery()
+        self._droneData.DIST_TOF = self._drone.get_distance_tof()
+        self._droneData.FLIGHT_TIME = self._drone.get_flight_time()
         self._droneData.FRAME = self.getFrame()
 
     def getData(self):
@@ -107,10 +108,10 @@ class TelloDrone(Tello, Controller):
     drones constant speed
     """
     def moveDrone(self):
-        self.send_rc_control(int(self.left_right * self.speed),
-                                   int(self.forward_backward * self.speed),
-                                   int(self.up_down * self.speed),
-                                   int(self.yaw * self.speed))
+        self.drone.send_rc_control(int(self.controller.left_right * self.controller.speed),
+                                   int(self.controller.forward_backward * self.controller.speed),
+                                   int(self.controller.up_down * self.controller.speed),
+                                   int(self.controller.yaw * self.controller.speed))
 
     """
     Lands the drone and turns off
@@ -118,8 +119,8 @@ class TelloDrone(Tello, Controller):
     """
     def turnOff(self):
         try:
-            self.land()
-            self.streamoff()
+            self.drone.land()
+            self.drone.streamoff()
         except:
             print("drone is already landing")
 
@@ -131,7 +132,7 @@ class TelloDrone(Tello, Controller):
     change_video_settings(self, width, height)
     """
     def getFrame(self):
-        drone_frame = self.get_frame_read()
+        drone_frame = self.drone.get_frame_read()
         drone_frame = drone_frame.frame
         img = cv2.resize(drone_frame, (self.width, self.height))
         return img

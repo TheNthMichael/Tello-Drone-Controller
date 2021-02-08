@@ -1,0 +1,61 @@
+--94779dd--2021-01-07--Michael R. Nickerson
+2	1	TelloEdu.py
+48	3	classes/Controller.py
+
+--9767c25--2021-01-07--Michael R Nickerson
+7	4	TelloEdu.py
+-	-	classes/__pycache__/Pid.cpython-39.pyc
+
+--07473af--2021-01-07--Michael R. Nickerson
+9	6	TelloEdu.py
+15	3	classes/Pid.py
+
+--a1f54c1--2021-01-07--Michael R. Nickerson
+4	0	classes/Pid.py
+
+--17851b3--2021-01-07--Michael R. Nickerson
+--dcfa4e3--2021-01-07--Michael R. Nickerson
+--d9c78d2--2021-01-07--Michael R Nickerson
+4	4	classes/TelloDrone.py
+-	-	classes/__pycache__/TelloDrone.cpython-39.pyc
+
+--63c88fa--2021-01-07--Michael Nickerson
+--af70bc9--2021-01-07--Michael Nickerson
+42	0	README.md
+
+--d9be74f--2021-01-07--Michael Nickerson
+0	0	README.md
+
+--fa5a842--2021-01-07--Michael Nickerson
+0	0	README.md
+
+--6f4ce28--2021-01-07--Michael R Nickerson
+2	1	TelloEdu.py
+-	-	classes/__pycache__/Controller.cpython-39.pyc
+-	-	classes/__pycache__/DroneState.cpython-39.pyc
+-	-	classes/__pycache__/Face.cpython-39.pyc
+-	-	classes/__pycache__/TelloDrone.cpython-39.pyc
+
+--d9886ef--2021-01-07--Michael R. Nickerson
+0	114	Controller.py
+0	44	DroneState.py
+0	75	Face.py
+0	104	TelloDrone.py
+33314	0	assets/haarcascade_frontalface_default.xml
+114	0	classes/Controller.py
+44	0	classes/DroneState.py
+75	0	classes/Face.py
+104	0	classes/TelloDrone.py
+0	33314	haarcascade_frontalface_default.xml
+0	75	main.py
+75	0	notes/main.py
+
+--dd4bcf6--2021-01-07--Michael R. Nickerson
+114	0	Controller.py
+44	0	DroneState.py
+75	0	Face.py
+0	0	README.md
+104	0	TelloDrone.py
+145	0	TelloEdu.py
+33314	0	haarcascade_frontalface_default.xml
+75	0	main.py

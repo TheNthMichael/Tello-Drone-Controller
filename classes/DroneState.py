@@ -1,8 +1,13 @@
+import sys, pygame, threading
+import cv2
+import numpy as np
+
+
 class States:
         WAITING = 0
         USER_CONTROL = 1
-        SEARCHING = 2
-        TRACKING = 3
+        USER_CONTROL_PLUS_TEST = 2
+        AUTO_FACE_FOCUS = 3
         EXIT = 4
 
 
@@ -19,46 +24,201 @@ tracking modes:
 class StateMachine:
     def __init__(self):
         # drone should initially be waiting
-        self.state = States.WAITING
-        self.auto = False
-        self.state_transition = {
-            States.WAITING : {
-                States.USER_CONTROL : prepare_user_control,
-                States.SEARCHING : prepare_searching,
-                States.EXIT : prepare_exit
-            },
-            States.USER_CONTROL : {
-                States.SEARCHING : prepare_searching,
-                States.WAITING : pause,
-                States.EXIT : prepare_exit
-            },
-            States.SEARCHING : {
-                States.TRACKING : prepare_tracking,
-                States.USER_CONTROL : prepare_user_control,
-                States.EXIT : prepare_exit
-            },
-            States.TRACKING : {
-                States.SEARCHING : prepare_searching,
-                States.USER_CONTROL : prepare_user_control,
-                States.EXIT : prepare_exit
+        self.state_object = Waiting()
+    
+"""
+base class for all other classes to inherit from
+"""
+class DroneState:
+    def __init__(self):
+        super().__init__()
+        self.state_type = States.EXIT
+
+    def action(self, drone, eventList):
+        pass
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass
+
+class Waiting(DroneState):
+    def __init__(self):
+        super().__init__() 
+        self.state_type = States.WAITING
+        self.state_transition : {
+                States.USER_CONTROL : lambda : UserControl(),
+                States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
+                States.EXIT : lambda : Exit()
             }
-        }
-        self.state_machine = {
-            States.WAITING : action_waiting,
-            States.USER_CONTROL : action_user_control,
-            States.SEARCHING : action_searching,
-            States.TRACKING : action_tracking,
-            States.EXIT : action_exit
-        }
+
+    def action(self, drone, eventList):
+        for event in pygame.event.get():
+                drone.reset_speed()
+                if event.type == pygame.QUIT:
+                    return self.change(state=States.EXIT)
+
+                if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+                    # emergency landing
+                    if event.key == pygame.K_ESCAPE:
+                        return self.change(state=States.EXIT)
+                    elif event.key == pygame.K_SPACE:
+                        launch_thread = threading.Thread(target=lambda drone: drone.takeoff(), args=[drone])
+                        launch_thread.start()
+                        while launch_thread.is_alive():
+                            data = drone.getData()
+                            frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+                            frame = np.rot90(frame)
+                            frame = np.flipud(frame)
+                        launch_thread.join()
+        data = drone.getData()
+        frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        frame = np.rot90(frame)
+        frame = np.flipud(frame)
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass
+
+class UserControl(DroneState):
+    def __init__(self):
+        super().__init__()
+        self.state_type = States.USER_CONTROL
+        self.state_transition : {
+                States.USER_CONTROL_PLUS_TEST: lambda : UserControlPlusTest(),
+                States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
+                States.EXIT : lambda : Exit()
+            }
+
+    def action(self, drone, eventList):
+        for event in pygame.event.get():
+                drone.reset_speed()
+                if event.type == pygame.QUIT:
+                    return self.change(state=States.EXIT)
+
+                if event.type == pygame.KEYDOWN:
+                    # emergency landing
+                    if event.key == pygame.K_ESCAPE:
+                        return self.change(state=States.EXIT)
+                    else:
+                        drone.key_down(event.key)
+
+                elif event.type == pygame.KEYUP:
+                    # emergency landing
+                    if event.key == pygame.K_ESCAPE:
+                        return self.change(state=States.EXIT)
+                    else:
+                        drone.key_up(event.key)
+        drone.moveDrone()
+        data = drone.getData()
+        frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        frame = np.rot90(frame)
+        frame = np.flipud(frame)
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass
+
+
+class UserControlPlusTest(DroneState):
+    def __init__(self):
+        super().__init__()
+        self.state_type = States.USER_CONTROL_PLUS_TEST
+        self.state_transition : {
+                States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
+                States.USER_CONTROL : lambda : UserControl(),
+                States.EXIT : lambda : Exit()
+            }
+        
     
-    def state_change(self, input):
-        state_changes = self.state_transition[self.state]
-        self.state = state_changes[input]
-        if self.state == States.SEARCHING or self.state == States.TRACKING:
-            self.auto = True
-        else:
-            self.auto = False
+    def action(self, drone, eventList):
+        for event in pygame.event.get():
+                drone.reset_speed()
+                if event.type == pygame.QUIT:
+                    return self.change(state=States.EXIT)
+
+                if event.type == pygame.KEYDOWN:
+                    # emergency landing
+                    if event.key == pygame.K_ESCAPE:
+                        return self.change(state=States.EXIT)
+                    else:
+                        drone.key_down(event.key)
+
+                elif event.type == pygame.KEYUP:
+                    # emergency landing
+                    if event.key == pygame.K_ESCAPE:
+                        return self.change(state=States.EXIT)
+                    else:
+                        drone.key_up(event.key)
+        drone.moveDrone()
+        data = drone.getData()
+        frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        frame = np.rot90(frame)
+        frame = np.flipud(frame)
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass
+
+
+class AutoFaceFocus(DroneState):
+    def __init__(self):
+        super().__init__()
+        self.state_type = States.AUTO_FACE_FOCUS
+        self.state_transition : {
+                States.USER_CONTROL : lambda : UserControl(),
+                States.USER_CONTROL_PLUS_TEST: lambda : UserControlPlusTest(),
+                States.EXIT : lambda : Exit()
+            }
     
-    def state_action(self):
-        self.state_action[self.state]()
-    
+    """
+    Creates a face object to be tracked
+    """
+    def detecting_face(self, frame, classifier):
+        I = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = classifier.detectMultiScale(I, 1.3, 5)
+        # return the first face that occures else return failure
+        scaling = 8
+        for (x, y, w, h) in faces:
+            return (True, Face( int(x + w//scaling), int(y + h//scaling), int(w - w//scaling), (h-h//scaling) ))
+        return (False, None)
+
+    def action(self, drone, eventList):
+        pass
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass
+
+
+class Exit(DroneState):
+    def __init__(self):
+        super().__init__()
+        self.state_type = States.EXIT
+        self.state_transition : {
+                States.EXIT : lambda : Exit()
+            }
+
+    def action(self, drone, eventList):
+        drone.turnOff()
+
+    def change(self, state=States.EXIT):
+        transition = self.state_transition[state]
+        return transition()
+
+    def clean(self, drone):
+        pass

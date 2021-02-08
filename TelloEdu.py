@@ -9,22 +9,11 @@ from DroneState import States, StateMachine
 from Face import Face
 from Pid import Pid
 
-"""
-Creates a face object to be tracked
-"""
-def detecting_face(frame, classifier):
-        I = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = classifier.detectMultiScale(I, 1.3, 5)
-        # return the first face that occures else return failure
-        scaling = 8
-        for (x, y, w, h) in faces:
-            return (True, Face( int(x + w//scaling), int(y + h//scaling), int(w - w//scaling), (h-h//scaling) ))
-        return (False, None)
 
 def myExp(x):
     return -1 * math.exp(-x/60) + 1
 
-def start_drone():
+def run_app():
     drone = TelloDrone()
     drone.change_video_settings(720, 600)
 
@@ -49,11 +38,10 @@ def start_drone():
             maxLevel=2,
             criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 100, 0.3))
 
-    
+    face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
+
     print(drone.drone.query_battery())
 
-    drone_active = True
-    face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
     myFace = None
     last_I = None
 
@@ -150,4 +138,4 @@ def start_drone():
 
 
 if __name__ == "__main__":
-    start_drone()
+    run_app()
