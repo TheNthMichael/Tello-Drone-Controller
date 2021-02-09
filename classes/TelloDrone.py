@@ -3,9 +3,9 @@
 #       Class for handling Tello
 #       Drone connections and 
 #       controls
-from djitellopy import Tello
 import cv2
 import numpy
+from djitellopy import Tello
 from Controller import Controller
 
 class DroneData:
@@ -26,7 +26,6 @@ class TelloDrone(Tello, Controller):
         if TelloDrone._instance == None:
             super().__init__()
             self._droneData = DroneData()
-            self.connect()
             self._width = 360
             self._height = 240
             TelloDrone._instance = self

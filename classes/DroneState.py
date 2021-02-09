@@ -64,24 +64,24 @@ class Waiting(DroneState):
 
     def action(self, drone, screen, eventList):
         for event in pygame.event.get():
-                drone.resetSpeed()
-                if event.type == pygame.QUIT:
-                    return self.change(state=States.EXIT)
+            drone.resetSpeed()
+            if event.type == pygame.QUIT:
+                return self.change(state=States.EXIT)
 
-                if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    elif event.key == pygame.K_SPACE:
-                        launch_thread = threading.Thread(target=lambda drone: drone.takeoff(), args=[drone])
-                        launch_thread.start()
-                        while launch_thread.is_alive():
-                            data = drone.getData()
-                            frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-                            frame = np.rot90(frame)
-                            frame = np.flipud(frame)
-                        launch_thread.join()
-                        return self.change(state=States.USER_CONTROL)
+            if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
+                    return self.change(state=States.EXIT)
+                elif event.key == pygame.K_SPACE:
+                    launch_thread = threading.Thread(target=lambda drone: drone.takeoff(), args=[drone])
+                    launch_thread.start()
+                    while launch_thread.is_alive():
+                        data = drone.getData()
+                        frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+                        frame = np.rot90(frame)
+                        frame = np.flipud(frame)
+                    launch_thread.join()
+                    return self.change(state=States.USER_CONTROL)
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
@@ -109,27 +109,27 @@ class UserControl(DroneState):
 
     def action(self, drone, screen, eventList):
         for event in pygame.event.get():
-                drone.resetSpeed()
-                if event.type == pygame.QUIT:
+            drone.resetSpeed()
+            if event.type == pygame.QUIT:
+                return self.change(state=States.EXIT)
+
+            if event.type == pygame.KEYDOWN:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
                     return self.change(state=States.EXIT)
+                elif event.key == pygame.K_1:
+                    return self.change(state=States.USER_CONTROL_PLUS_TEST)
+                elif event.key == pygame.K_2:
+                    return self.change(state=States.AUTO_FACE_FOCUS)
+                else:
+                    drone.key_down(event.key)
 
-                if event.type == pygame.KEYDOWN:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    elif event.key == pygame.K_1:
-                        return self.change(state=States.USER_CONTROL_PLUS_TEST)
-                    elif event.key == pygame.K_2:
-                        return self.change(state=States.AUTO_FACE_FOCUS)
-                    else:
-                        drone.key_down(event.key)
-
-                elif event.type == pygame.KEYUP:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    else:
-                        drone.key_up(event.key)
+            elif event.type == pygame.KEYUP:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
+                    return self.change(state=States.EXIT)
+                else:
+                    drone.key_up(event.key)
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
@@ -160,27 +160,27 @@ class UserControlPlusTest(DroneState):
     
     def action(self, drone, screen, eventList):
         for event in pygame.event.get():
-                drone.resetSpeed()
-                if event.type == pygame.QUIT:
+            drone.resetSpeed()
+            if event.type == pygame.QUIT:
+                return self.change(state=States.EXIT)
+
+            if event.type == pygame.KEYDOWN:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
                     return self.change(state=States.EXIT)
+                elif event.key == pygame.K_1:
+                    return self.change(state=States.USER_CONTROL)
+                elif event.key == pygame.K_2:
+                    return self.change(state=States.AUTO_FACE_FOCUS)
+                else:
+                    drone.key_down(event.key)
 
-                if event.type == pygame.KEYDOWN:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    elif event.key == pygame.K_1:
-                        return self.change(state=States.USER_CONTROL)
-                    elif event.key == pygame.K_2:
-                        return self.change(state=States.AUTO_FACE_FOCUS)
-                    else:
-                        drone.key_down(event.key)
-
-                elif event.type == pygame.KEYUP:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    else:
-                        drone.key_up(event.key)
+            elif event.type == pygame.KEYUP:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
+                    return self.change(state=States.EXIT)
+                else:
+                    drone.key_up(event.key)
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
@@ -286,27 +286,27 @@ class AutoFaceFocus(DroneState):
 
     def action(self, drone, screen, eventList):
         for event in pygame.event.get():
-                drone.resetSpeed()
-                if event.type == pygame.QUIT:
+            drone.resetSpeed()
+            if event.type == pygame.QUIT:
+                return self.change(state=States.EXIT)
+
+            if event.type == pygame.KEYDOWN:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
                     return self.change(state=States.EXIT)
+                elif event.key == pygame.K_1:
+                    return self.change(state=States.USER_CONTROL)
+                elif event.key == pygame.K_2:
+                    return self.change(state=States.USER_CONTROL_PLUS_TEST)
+                else:
+                    drone.key_down(event.key)
 
-                if event.type == pygame.KEYDOWN:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    elif event.key == pygame.K_1:
-                        return self.change(state=States.USER_CONTROL)
-                    elif event.key == pygame.K_2:
-                        return self.change(state=States.USER_CONTROL_PLUS_TEST)
-                    else:
-                        drone.key_down(event.key)
-
-                elif event.type == pygame.KEYUP:
-                    # emergency landing
-                    if event.key == pygame.K_ESCAPE:
-                        return self.change(state=States.EXIT)
-                    else:
-                        drone.key_up(event.key)
+            elif event.type == pygame.KEYUP:
+                # emergency landing
+                if event.key == pygame.K_ESCAPE:
+                    return self.change(state=States.EXIT)
+                else:
+                    drone.key_up(event.key)
         data = drone.getData()
         frame = data.FRAME
         if self._affstate == AFFStates.SEARCHING:

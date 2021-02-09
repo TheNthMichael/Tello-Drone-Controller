@@ -8,15 +8,15 @@ from DroneState import *
 
 
 def start():
-    drone = TelloDrone()
-    drone.changeVideoSettings(720, 600)
-
     stateMachine = StateMachine()
 
     pygame.init()
     size = width, height = 720, 600
     screen = pygame.display.set_mode((size))
-    img = pygame.Surface((width, height))
+
+    drone = TelloDrone()
+    drone.changeVideoSize(720, 600)
+    drone.connect()
 
     print(drone.query_battery())
 
