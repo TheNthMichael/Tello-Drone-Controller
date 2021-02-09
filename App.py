@@ -4,13 +4,8 @@ import cv2
 import numpy
 import math
 from TelloDrone import TelloDrone
-from Controller import Controller
-from DroneState
-from Face import Face
-from Pid import Pid
+from DroneState import *
 
-if __name__ == "__main__":
-    start()
 
 def start():
     drone = TelloDrone()
@@ -42,3 +37,8 @@ def start():
             raise
     drone.turnOff()
     cv2.destroyAllWindows()
+
+
+
+if __name__ == "__main__":
+    start()
