@@ -8,24 +8,20 @@ for the Tello Edu drone:
     more controls.
 """
 class Controller:
-    _instance = None
     def __init__(self):
-        if Controller._instance is None:
-            self._mov_vector = [0, 0, 0, 0]
-            self._spd_vector = [60, 60, 60, 60]
-            self._spd = 60
-            self._switch = {
-                    pygame.K_w : (0, 1),    #forward
-                    pygame.K_s : (0, -1),   #backward
-                    pygame.K_a : (1, -1),   #left
-                    pygame.K_d : (1, 1),    #right
-                    pygame.K_q : (3, -1),   #turn_left
-                    pygame.K_e : (3, 1),    #turn_right
-                    pygame.K_SPACE : (2, 1),    #up
-                    pygame.K_LSHIFT : (2, -1)   #down
-                }
-        else:
-            raise Exception("Error, only one instance of a Controller class allowed")
+        self._mov_vector = [0, 0, 0, 0]
+        self._spd_vector = [60, 60, 60, 60]
+        self._spd = 60
+        self._switch = {
+                pygame.K_w : (0, 1),    #forward
+                pygame.K_s : (0, -1),   #backward
+                pygame.K_a : (1, -1),   #left
+                pygame.K_d : (1, 1),    #right
+                pygame.K_q : (3, -1),   #turn_left
+                pygame.K_e : (3, 1),    #turn_right
+                pygame.K_SPACE : (2, 1),    #up
+                pygame.K_LSHIFT : (2, -1)   #down
+            }
     
     """
     Handles mapping a keydown to a 

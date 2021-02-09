@@ -1,7 +1,7 @@
 import sys, threading, pygame
 sys.path.append('./classes')
 import cv2
-import numpy
+import numpy as np
 import math
 from TelloDrone import TelloDrone
 from Controller import Controller
@@ -21,17 +21,16 @@ class StateMachine:
     def __init__(self):
         self.state = Waiting()
 
-    def run(self, drone, eventList):
-        tmp_state = state.action(drone, eventList)
-        if tmp_state != None:
-            self.state.clean()
+    def run(self, drone, screen, eventList):
+        tmp_state = self.state.action(drone, screen, eventList)
+        if tmp_state is not None:
+            self.state.clean(drone)
             self.state = tmp_state
 
     def isNotExit(self):
-        return (self.state.type != States.EXIT)
+        return (self.state.state_type != States.EXIT)
     
     def forceExit(self):
-        self.state.clean()
         self.state = Exit()
     
 """
@@ -41,6 +40,9 @@ class DroneState:
     def __init__(self):
         super().__init__()
         self.state_type = States.EXIT
+        self.state_transition = {
+                States.EXIT : lambda : Exit()
+            }
 
     def action(self, drone, eventList):
         pass
@@ -56,15 +58,15 @@ class Waiting(DroneState):
     def __init__(self):
         super().__init__() 
         self.state_type = States.WAITING
-        self.state_transition : {
+        self.state_transition =  {
                 States.USER_CONTROL : lambda : UserControl(),
                 States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
                 States.EXIT : lambda : Exit()
             }
 
     def action(self, drone, screen, eventList):
-        for event in pygame.event.get():
-            drone.resetSpeed()
+        drone.resetSpeed()
+        for event in eventList:
             if event.type == pygame.QUIT:
                 return self.change(state=States.EXIT)
 
@@ -89,10 +91,10 @@ class Waiting(DroneState):
         frame = pygame.surfarray.make_surface(frame)
         screen.blit(frame, (0, 0))
         pygame.display.update()
+        return None
 
     def change(self, state=States.EXIT):
-        transition = self.state_transition[state]
-        return transition()
+        return self.state_transition[state]()
 
     def clean(self, drone):
         drone.resetSpeed()
@@ -101,14 +103,14 @@ class UserControl(DroneState):
     def __init__(self):
         super().__init__()
         self.state_type = States.USER_CONTROL
-        self.state_transition : {
+        self.state_transition = {
                 States.USER_CONTROL_PLUS_TEST: lambda : UserControlPlusTest(),
                 States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
                 States.EXIT : lambda : Exit()
             }
 
     def action(self, drone, screen, eventList):
-        for event in pygame.event.get():
+        for event in eventList:
             drone.resetSpeed()
             if event.type == pygame.QUIT:
                 return self.change(state=States.EXIT)
@@ -138,10 +140,10 @@ class UserControl(DroneState):
         frame = pygame.surfarray.make_surface(frame)
         screen.blit(frame, (0, 0))
         pygame.display.update()
+        return None
 
     def change(self, state=States.EXIT):
-        transition = self.state_transition[state]
-        return transition()
+        return self.state_transition[state]()
 
     def clean(self, drone):
         drone.resetSpeed()
@@ -151,7 +153,7 @@ class UserControlPlusTest(DroneState):
     def __init__(self):
         super().__init__()
         self.state_type = States.USER_CONTROL_PLUS_TEST
-        self.state_transition : {
+        self.state_transition = {
                 States.AUTO_FACE_FOCUS : lambda : AutoFaceFocus(),
                 States.USER_CONTROL : lambda : UserControl(),
                 States.EXIT : lambda : Exit()
@@ -159,7 +161,7 @@ class UserControlPlusTest(DroneState):
         
     
     def action(self, drone, screen, eventList):
-        for event in pygame.event.get():
+        for event in eventList:
             drone.resetSpeed()
             if event.type == pygame.QUIT:
                 return self.change(state=States.EXIT)
@@ -189,10 +191,10 @@ class UserControlPlusTest(DroneState):
         frame = pygame.surfarray.make_surface(frame)
         screen.blit(frame, (0, 0))
         pygame.display.update()
+        return None
 
     def change(self, state=States.EXIT):
-        transition = self.state_transition[state]
-        return transition()
+        return self.state_transition[state]()
 
     def clean(self, drone):
         drone.resetSpeed()
@@ -206,7 +208,7 @@ class AutoFaceFocus(DroneState):
     def __init__(self):
         super().__init__()
         self.state_type = States.AUTO_FACE_FOCUS
-        self.state_transition : {
+        self.state_transition = {
                 States.USER_CONTROL : lambda : UserControl(),
                 States.USER_CONTROL_PLUS_TEST: lambda : UserControlPlusTest(),
                 States.EXIT : lambda : Exit()
@@ -285,7 +287,7 @@ class AutoFaceFocus(DroneState):
         return (None, None, None, None)
 
     def action(self, drone, screen, eventList):
-        for event in pygame.event.get():
+        for event in eventList:
             drone.resetSpeed()
             if event.type == pygame.QUIT:
                 return self.change(state=States.EXIT)
@@ -342,12 +344,12 @@ class AutoFaceFocus(DroneState):
         frame = np.rot90(frame)
         frame = np.flipud(frame)
         frame = pygame.surfarray.make_surface(frame)
-        self.screen.blit(frame, (0, 0))
+        screen.blit(frame, (0, 0))
         pygame.display.update()
+        return None
 
     def change(self, state=States.EXIT):
-        transition = self.state_transition[state]
-        return transition()
+        return self.state_transition[state]()
 
     def clean(self, drone):
         drone.resetSpeed()
@@ -357,16 +359,16 @@ class Exit(DroneState):
     def __init__(self):
         super().__init__()
         self.state_type = States.EXIT
-        self.state_transition : {
+        self.state_transition = {
                 States.EXIT : lambda : Exit()
             }
 
     def action(self, drone, eventList):
         drone.turnOff()
+        return None
 
     def change(self, state=States.EXIT):
-        transition = self.state_transition[state]
-        return transition()
+        return self.state_transition[state]()
 
     def clean(self, drone):
         pass

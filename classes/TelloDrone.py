@@ -24,7 +24,8 @@ class TelloDrone(Tello, Controller):
     _instance = None
     def __init__(self):
         if TelloDrone._instance == None:
-            super().__init__()
+            super(TelloDrone, self).__init__()
+            Controller.__init__(self)
             self._droneData = DroneData()
             self._width = 360
             self._height = 240
@@ -136,7 +137,7 @@ class TelloDrone(Tello, Controller):
     def getFrame(self):
         drone_frame = self.get_frame_read()
         drone_frame = drone_frame.frame
-        img = cv2.resize(drone_frame, (self.width, self.height))
+        img = cv2.resize(drone_frame, (self._width, self._height))
         return img
 
     """

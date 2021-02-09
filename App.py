@@ -36,7 +36,6 @@ def start():
             drone.turnOff()
             raise
     drone.turnOff()
-    cv2.destroyAllWindows()
 
 
 
