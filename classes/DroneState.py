@@ -5,14 +5,11 @@ import numpy
 import math
 from TelloDrone import TelloDrone
 from Controller import Controller
-from DroneState import States, StateMachine
 from Pid import Pid
 
 """
 Class based state machine
 """
-
-
 class States:
         WAITING = 0
         USER_CONTROL = 1
@@ -26,9 +23,9 @@ class StateMachine:
 
     def run(self, drone, eventList):
         tmp_state = state.action(drone, eventList)
-            if tmp_state != None:
-                self.state.clean()
-                self.state = tmp_state
+        if tmp_state != None:
+            self.state.clean()
+            self.state = tmp_state
 
     def isNotExit(self):
         return (self.state.type != States.EXIT)
