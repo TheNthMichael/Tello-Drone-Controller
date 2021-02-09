@@ -65,7 +65,7 @@ class Waiting(DroneState):
                 States.EXIT : lambda : Exit()
             }
 
-    def action(self, drone, eventList):
+    def action(self, drone, screen, eventList):
         for event in pygame.event.get():
                 drone.resetSpeed()
                 if event.type == pygame.QUIT:
@@ -89,6 +89,9 @@ class Waiting(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
+        frame = pygame.surfarray.make_surface(frame)
+        screen.blit(frame, (0, 0))
+        pygame.display.update()
 
     def change(self, state=States.EXIT):
         transition = self.state_transition[state]
@@ -107,7 +110,7 @@ class UserControl(DroneState):
                 States.EXIT : lambda : Exit()
             }
 
-    def action(self, drone, eventList):
+    def action(self, drone, screen, eventList):
         for event in pygame.event.get():
                 drone.resetSpeed()
                 if event.type == pygame.QUIT:
@@ -135,6 +138,9 @@ class UserControl(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
+        frame = pygame.surfarray.make_surface(frame)
+        screen.blit(frame, (0, 0))
+        pygame.display.update()
 
     def change(self, state=States.EXIT):
         transition = self.state_transition[state]
@@ -155,7 +161,7 @@ class UserControlPlusTest(DroneState):
             }
         
     
-    def action(self, drone, eventList):
+    def action(self, drone, screen, eventList):
         for event in pygame.event.get():
                 drone.resetSpeed()
                 if event.type == pygame.QUIT:
@@ -183,6 +189,9 @@ class UserControlPlusTest(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
+        frame = pygame.surfarray.make_surface(frame)
+        screen.blit(frame, (0, 0))
+        pygame.display.update()
 
     def change(self, state=States.EXIT):
         transition = self.state_transition[state]
@@ -278,7 +287,7 @@ class AutoFaceFocus(DroneState):
             return (x, y, x+w, y+h)
         return (None, None, None, None)
 
-    def action(self, drone, eventList):
+    def action(self, drone, screen, eventList):
         for event in pygame.event.get():
                 drone.resetSpeed()
                 if event.type == pygame.QUIT:
@@ -335,6 +344,9 @@ class AutoFaceFocus(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
+        frame = pygame.surfarray.make_surface(frame)
+        self.screen.blit(frame, (0, 0))
+        pygame.display.update()
 
     def change(self, state=States.EXIT):
         transition = self.state_transition[state]

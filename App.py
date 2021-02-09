@@ -33,7 +33,7 @@ def start():
         # check for pygame events
         eventList = pygame.event.get()
         try:
-            stateMachine.run(drone, eventList)
+            stateMachine.run(drone, screen, eventList)
         except:
             print('-- TRACKING FAILED --')
             drone._spd = 0
