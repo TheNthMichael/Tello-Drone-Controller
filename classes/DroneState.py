@@ -80,7 +80,7 @@ class Waiting(DroneState):
                     while launch_thread.is_alive():
                         data = drone.getData()
                         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-                        cv2.putText(frame, "Launching...", (10, 10),
+                        cv2.putText(frame, "Launching...", (30, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                         frame = np.rot90(frame)
                         frame = np.flipud(frame)
@@ -91,7 +91,7 @@ class Waiting(DroneState):
                     return self.change(state=States.USER_CONTROL)
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-        cv2.putText(frame, "In State Waiting", (10, 10),
+        cv2.putText(frame, "In State Waiting", (30, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
@@ -142,7 +142,7 @@ class UserControl(DroneState):
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-        cv2.putText(frame, "In State UserControl", (10, 10),
+        cv2.putText(frame, "In State UserControl", (30, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
@@ -195,7 +195,7 @@ class UserControlPlusTest(DroneState):
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-        cv2.putText(frame, "In State UserControlPlusTest", (10, 10),
+        cv2.putText(frame, "In State UserControlPlusTest", (30, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
@@ -226,11 +226,11 @@ class AutoFaceFocus(DroneState):
             }
         # Program Control State has 2 different internal states
         # for searching and tracking
-        self._affstate = AFFStates.SEARCHING
+        self._affstate = AutoFaceFocus.AFFStates.SEARCHING
         self._face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
         self._tracker = cv2.TrackerKCF_create()
         self._failure_count = 0
-        self._failure_needed = 10
+        self._failure_needed = 900
         self._pid = Pid(1,1,1, 1.0/30, -100, 100)
         self.bbox = (0,0,0,0)
 
@@ -322,14 +322,17 @@ class AutoFaceFocus(DroneState):
                     drone.key_up(event.key)
         data = drone.getData()
         frame = data.FRAME
-        if self._affstate == AFFStates.SEARCHING:
+        if self._affstate == AutoFaceFocus.AFFStates.SEARCHING:
+            cv2.putText(frame, "Searching For Face", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
             self.bbox = self.detectSingleFace(frame)
             if self.bbox != (None, None, None, None):
                 success = self._tracker.init(frame, self.bbox)
-                self._affstate == AFFStates.TRACKING
-        elif self._affstate == AFFStates.TRACKING:
+                self._affstate == AutoFaceFocus.AFFStates.TRACKING
+        elif self._affstate == AutoFaceFocus.AFFStates.TRACKING:
+            print('here')
             success, self.bbox = self._tracker.update(frame)
             if success:
+                cv2.putText(frame, "Tracking Face", (100,80), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
                 # Tracking success
                 p1 = (int(bbox[0]), int(bbox[1]))
                 p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
@@ -347,12 +350,13 @@ class AutoFaceFocus(DroneState):
                 self._failure_count += 1
                 drone.yaw = 0
                 if self._failure_count > self._failure_needed:
+                    self.bbox = (None, None, None, None)
                     self._failure_count = 0
                     self._pid.reset()
-                    self._affstate == AFFStates.SEARCHING
+                    self._affstate == AutoFaceFocus.AFFStates.SEARCHING
         drone.moveDrone()
-        frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
-        cv2.putText(frame, "In State AutoFaceFocus", (10, 10),
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        cv2.putText(frame, "In State AutoFaceFocus", (30, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)

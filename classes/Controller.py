@@ -98,11 +98,11 @@ class Controller:
         self._mov_vector[3] = dir
 
     @property
-    def speed(self):
+    def cspeed(self):
         return self._spd
     
-    @speed.setter
-    def speed(self, value):
+    @cspeed.setter
+    def cspeed(self, value):
         if value > 100 or value < 0:
             raise Exception("Error speed must be a value\
                             between 0 and 100")
