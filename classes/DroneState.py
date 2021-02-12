@@ -80,6 +80,8 @@ class Waiting(DroneState):
                     while launch_thread.is_alive():
                         data = drone.getData()
                         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+                        cv2.putText(frame, "Launching...", (10, 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
                         frame = np.rot90(frame)
                         frame = np.flipud(frame)
                         frame = pygame.surfarray.make_surface(frame)
@@ -89,6 +91,8 @@ class Waiting(DroneState):
                     return self.change(state=States.USER_CONTROL)
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        cv2.putText(frame, "In State Waiting", (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
         frame = pygame.surfarray.make_surface(frame)
@@ -138,6 +142,8 @@ class UserControl(DroneState):
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        cv2.putText(frame, "In State UserControl", (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
         frame = pygame.surfarray.make_surface(frame)
@@ -189,6 +195,8 @@ class UserControlPlusTest(DroneState):
         drone.moveDrone()
         data = drone.getData()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        cv2.putText(frame, "In State UserControlPlusTest", (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
         frame = pygame.surfarray.make_surface(frame)
@@ -344,6 +352,8 @@ class AutoFaceFocus(DroneState):
                     self._affstate == AFFStates.SEARCHING
         drone.moveDrone()
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
+        cv2.putText(frame, "In State AutoFaceFocus", (10, 10),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         frame = np.rot90(frame)
         frame = np.flipud(frame)
         frame = pygame.surfarray.make_surface(frame)
