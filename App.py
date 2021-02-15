@@ -1,10 +1,11 @@
 import sys, pygame
-sys.path.append('./classes')
+
+sys.path.append("./classes")
 import cv2
 import numpy
 import math
 from TelloDrone import TelloDrone
-from DroneState import *
+from StateMachine import StateMachine
 
 
 def start():
@@ -20,9 +21,9 @@ def start():
 
     print(drone.query_battery())
 
-    if (drone.query_battery() < 10):
-        print('Error Battery Too Low...')
-        raise Exception('Error Battery Too Low')
+    if drone.query_battery() < 10:
+        print("Error Battery Too Low...")
+        raise Exception("Error Battery Too Low")
 
     while stateMachine.isNotExit():
         # check for pygame events
@@ -30,13 +31,12 @@ def start():
         try:
             stateMachine.run(drone, screen, eventList)
         except:
-            print('-- TRACKING FAILED --')
+            print("-- TRACKING FAILED --")
             drone._spd = 0
             stateMachine.forceExit()
             drone.turnOff()
             raise
     drone.turnOff()
-
 
 
 if __name__ == "__main__":
