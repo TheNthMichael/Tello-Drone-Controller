@@ -1,12 +1,16 @@
 import sys, threading, pygame
-sys.path.append('./classes')
+sys.path.append('./states')
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import math
 from TelloDrone import TelloDrone
-from Controller import Controller
-from Pid import Pid
+from StateEnumeration import *
+
+from Waiting import Waiting
+from UserControl import UserControl
+from UserControlPlusTest import UserControlPlusTest
+from AutoFaceFocus import AutoFaceFocus
+from Exit import Exit
 
 class StateMachine:
     def __init__(self):

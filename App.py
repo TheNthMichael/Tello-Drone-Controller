@@ -4,7 +4,7 @@ import cv2
 import numpy
 import math
 from TelloDrone import TelloDrone
-from DroneState import *
+from StateMachine import StateMachine
 
 
 def start():
