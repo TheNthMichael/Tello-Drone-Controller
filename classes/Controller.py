@@ -93,8 +93,8 @@ class Controller:
     
     @yaw.setter
     def yaw(self, dir):
-        if dir >= 1 or dir <= -1:
-            raise Exception("Error, direction can be of magnitude 1")
+        #if dir >= 1 or dir <= -1:
+            #raise Exception("Error, direction can be of magnitude 1")
         self._mov_vector[3] = dir
 
     @property

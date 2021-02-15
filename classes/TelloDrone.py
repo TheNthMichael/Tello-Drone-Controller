@@ -79,9 +79,9 @@ class TelloDrone(Tello, Controller):
             self.get_acceleration_z()
         )
         self._droneData.SPD = (
-            self.get_speed_x,
-            self.get_speed_y,
-            self.get_speed_z
+            self.get_speed_x(),
+            self.get_speed_y(),
+            self.get_speed_z()
         )
         self._droneData.ROTATION = (
             self.get_pitch(),
