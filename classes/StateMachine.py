@@ -5,11 +5,11 @@ import math
 import numpy as np
 
 # Add paths
-sys.path.append("./states")
+sys.path.append("./classes/states")
 
 # Custom Required Classes
 from TelloDrone import TelloDrone
-from StateEnumeration import *
+from StateEnumeration import States
 
 # Custom State Classes
 from Waiting import Waiting
@@ -21,6 +21,7 @@ from Exit import Exit
 class StateMachine:
     def __init__(self):
         self.state = Waiting()
+        self.state_type = States.WAITING
         self._isExit = False
         self.stateTransitions = {
             States.WAITING: {
@@ -55,7 +56,8 @@ class StateMachine:
     def change(self, stateTo=States.EXIT):
         if stateTo == States.EXIT:
             self._isExit = True
-        self.state = self.stateTransition[self.state][stateTo]()
+        self.state = self.stateTransitions[self.state_type][stateTo]()
+        self.state_type = stateTo
 
     def isNotExit(self):
         return not self._isExit
