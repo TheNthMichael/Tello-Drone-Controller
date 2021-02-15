@@ -7,33 +7,26 @@ from TelloDrone import TelloDrone
 from Controller import Controller
 from DroneState import States, StateMachine
 from Face import Face
+from Pid import Pid
 
-"""
-Creates a face object to be tracked
-"""
-def detecting_face(frame, classifier):
-        I = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = classifier.detectMultiScale(I, 1.3, 5)
-        # return the first face that occures else return failure
-        scaling = 8
-        for (x, y, w, h) in faces:
-            return (True, Face( int(x + w//scaling), int(y + h//scaling), int(w - w//scaling), (h-h//scaling) ))
-        return (False, None)
 
 def myExp(x):
     return -1 * math.exp(-x/60) + 1
 
-def start_drone():
+def run_app():
     drone = TelloDrone()
     drone.change_video_settings(720, 600)
 
     controller = Controller()
+    controller.yaw_speed = 70
 
     state_machine = StateMachine()
 
+    pid = Pid(1,1,1, 1.0/30)
+
     pygame.init()
     size = width, height = 720, 600
-    screen = pygame.display.set_mode(size)
+    screen = pygame.display.set_mode((size))
     img = pygame.Surface((width, height))
 
     features = dict(maxCorners=500,
@@ -45,11 +38,10 @@ def start_drone():
             maxLevel=2,
             criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 100, 0.3))
 
-    
+    face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
+
     print(drone.drone.query_battery())
 
-    drone_active = True
-    face_cascade = cv2.CascadeClassifier('assets/haarcascade_frontalface_default.xml')
     myFace = None
     last_I = None
 
@@ -124,10 +116,13 @@ def start_drone():
                         img = cv2.circle(img, ( cmx, cmy), 15, myFace.colors[0].tolist(), -1)
                         img = cv2.rectangle(img, (int(myFace.x),int(myFace.y) ), (int(myFace.x + myFace.w), int(myFace.y + myFace.h) ), (255,100,100), 2)
                         diff = cmx - (width // 2)
-                        if diff < 30:
-                            controller.yaw = -1 * myExp(abs(diff))
-                        elif cmx - (width // 2) > 30:
-                            controller.yaw = myExp(abs(diff))
+                        # sign = diff / abs(diff)
+                        output = pid.output(diff)
+                        if abs(diff) > 50:
+                            sign = 1
+                            if output != 0:
+                                sign = output / abs(output)
+                            controller.yaw = sign * myExp(abs(output))
                         else:
                             controller.yaw = 0
                         if not ret:
@@ -143,4 +138,4 @@ def start_drone():
 
 
 if __name__ == "__main__":
-    start_drone()
+    run_app()

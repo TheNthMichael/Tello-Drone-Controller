@@ -18,7 +18,7 @@ class Face:
         self.p0 = None
         self.colors = None
 
-    def prepare_tracker(self, frame, features):
+    def prepareTracker(self, frame, features):
         try:
             self.colors = np.random.randint(0, 255, (100, 3))
             last_I = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -30,7 +30,7 @@ class Face:
         except:
             raise
 
-    def tracking_face(self, last_I, frame, lk):
+    def opticalFlowTracking(self, last_I, frame, lk):
         try:
             I = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             p1, st, err = cv2.calcOpticalFlowPyrLK(last_I, I, self.p0, None, **lk)
