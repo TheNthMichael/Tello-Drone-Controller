@@ -1,27 +1,30 @@
 #   Michael Nickerson 12/25/2020
 #   Description:
 #       Class for handling Tello
-#       Drone connections and 
+#       Drone connections and
 #       controls
 import cv2
 import numpy
 from djitellopy import Tello
 from Controller import Controller
 
+
 class DroneData:
     def __init__(self):
         self.ACC = (0, 0, 0)
-        self.SPD = (0,0,0)
+        self.SPD = (0, 0, 0)
         self.BAR_HEIGHT = 0
         self.HEIGHT = 0  # in cm
-        self.ROTATION = (0,0,0) # pitch, roll, yaw
-        self.BATTERY = 0    # 0 - 100
+        self.ROTATION = (0, 0, 0)  # pitch, roll, yaw
+        self.BATTERY = 0  # 0 - 100
         self.DIST_TOF = 0
         self.FLIGHT_TIME = 0
         self.FRAME = None
 
+
 class TelloDrone(Tello, Controller):
     _instance = None
+
     def __init__(self):
         if TelloDrone._instance == None:
             super(TelloDrone, self).__init__()
@@ -39,29 +42,31 @@ class TelloDrone(Tello, Controller):
     the importance of this is since I use
     send_rc_control to move
     """
+
     def resetSpeed(self):
         self.for_back_velocity = 0
         self.left_right_velocity = 0
         self.up_down_velocity = 0
         self.yaw_velocity = 0
         self.speed = 0
-    
+
     """
     calls the djitellopy commands
     to turn off the drones stream
     and turn it back on.
     """
+
     def streamReset(self):
         self.streamoff()
         self.streamon()
 
-    
     """
     Connect to the drone,
     reset the drones speed,
     print the battery, and
     reset the video stream
     """
+
     def connect(self):
         super(TelloDrone, self).connect()
         self.resetSpeed()
@@ -76,18 +81,14 @@ class TelloDrone(Tello, Controller):
         self._droneData.ACC = (
             self.get_acceleration_x(),
             self.get_acceleration_y(),
-            self.get_acceleration_z()
+            self.get_acceleration_z(),
         )
         self._droneData.SPD = (
             self.get_speed_x(),
             self.get_speed_y(),
-            self.get_speed_z()
+            self.get_speed_z(),
         )
-        self._droneData.ROTATION = (
-            self.get_pitch(),
-            self.get_roll(),
-            self.get_yaw()
-        )
+        self._droneData.ROTATION = (self.get_pitch(), self.get_roll(), self.get_yaw())
         self._droneData.BAR_HEIGHT = self.get_barometer()
         self._droneData.HEIGHT = self.get_height()
         self._droneData.BATTERY = self.get_battery()
@@ -102,7 +103,6 @@ class TelloDrone(Tello, Controller):
     def getData(self):
         self.updateData()
         return self._droneData
-        
 
     """
     Moves the drone by using a controller
@@ -110,16 +110,20 @@ class TelloDrone(Tello, Controller):
     movement axis and multiplied by the
     drones constant speed
     """
+
     def moveDrone(self):
-        self.send_rc_control(int(self.left_right * self.cspeed),
-                                   int(self.forward_backward * self.cspeed),
-                                   int(self.up_down * self.cspeed),
-                                   int(self.yaw * self.cspeed))
+        self.send_rc_control(
+            int(self.left_right * self.cspeed),
+            int(self.forward_backward * self.cspeed),
+            int(self.up_down * self.cspeed),
+            int(self.yaw * self.cspeed),
+        )
 
     """
     Lands the drone and turns off
     the video stream.
     """
+
     def turnOff(self):
         try:
             self.land()
@@ -127,13 +131,13 @@ class TelloDrone(Tello, Controller):
         except:
             print("drone is already landing")
 
-        
     """
     gets a single video frame from the
     drone and resizes it to the width
     and height parameters set through
     change_video_settings(self, width, height)
     """
+
     def getFrame(self):
         drone_frame = self.get_frame_read()
         drone_frame = drone_frame.frame
@@ -144,6 +148,7 @@ class TelloDrone(Tello, Controller):
     trying to turn a drone frame into a surface
     to be displayed on a pygame screen.
     """
+
     def frame2surface(self, surface, arr):
         tmp = surface.get_buffer()
         tmp.write(arr.tostring(), 0)
