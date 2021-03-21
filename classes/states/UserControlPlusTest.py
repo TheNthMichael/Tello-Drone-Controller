@@ -1,4 +1,4 @@
-import sys, threading, pygame
+import sys, threading, multiprocessing, queue, pygame
 import cv2
 import math
 import numpy as np
@@ -11,17 +11,17 @@ sys.path.append("../")
 from TelloDrone import TelloDrone
 from StateEnumeration import *
 from DroneState import DroneState
+from MultiProcGraph import StartGraph
 
 
 class UserControlPlusTest(DroneState):
     def __init__(self):
         super().__init__()
         self.stateAsString = "UserControlPlusTest"
-        """
-        self.figure = plt.figure()
-        self.ax = self.figure.gca(projection='3d')
-        self.figure.show()
-        """
+        self.q = multiprocessing.Queue()
+        self.proc = multiprocessing.Process(None, plot, args=(q, title))
+        self.proc.daemon = True
+        self.proc.start()
         self.previousEstimatedPoses = {
             "x": [0],
             "y": [0],
@@ -54,16 +54,22 @@ class UserControlPlusTest(DroneState):
             + droneData.SPD[0]
             + (droneData.ACC[0] * dt * dt) / 2
         )
+        self.previousEstimatedPoses["x"].pop(0)
+
         self.previousEstimatedPoses["y"].append(
             self.previousEstimatedPoses["y"][-1]
             + droneData.SPD[1]
             + (droneData.ACC[1] * dt * dt) / 2
         )
+        self.previousEstimatedPoses["y"].pop(0)
+
         self.previousEstimatedPoses["z"].append(
             self.previousEstimatedPoses["z"][-1]
             + droneData.SPD[2]
             + (droneData.ACC[2] * dt * dt) / 2
         )
+        self.previousEstimatedPoses["z"].pop(0)
+
         # convert rotation vector from degree to radian
         droneData.ROTATION = (
             math.radians(droneData.ROTATION[0]),
@@ -73,24 +79,21 @@ class UserControlPlusTest(DroneState):
         self.previousEstimatedPoses["u"].append(
             math.sin(droneData.ROTATION[1]) * math.cos(droneData.ROTATION[2]),
         )
+        self.previousEstimatedPoses["u"].pop(0)
+
         self.previousEstimatedPoses["v"].append(
             math.sin(droneData.ROTATION[1]) * math.sin(droneData.ROTATION[2]),
         )
+        self.previousEstimatedPoses["v"].pop(0)
+
         self.previousEstimatedPoses["w"].append(math.cos(droneData.ROTATION[2]))
+        self.previousEstimatedPoses["w"].pop(0)
+
         self.previousEstimatedPoses["t"].append(droneData.FLIGHT_TIME)
+        self.previousEstimatedPoses["t"].pop(0)
 
     def drawPoses(self):
-        pass
-        """self.ax.quiver(
-            self.previousEstimatedPoses["x"],
-            self.previousEstimatedPoses["y"],
-            self.previousEstimatedPoses["z"],
-            self.previousEstimatedPoses["u"],
-            self.previousEstimatedPoses["v"],
-            self.previousEstimatedPoses["w"],
-            color='b'
-        )
-        self.figure.canvas.draw()"""
+        self.q.put(self.previousEstimatedPoses)
 
     def action(self, drone, screen, eventList):
         for event in eventList:
