@@ -31,7 +31,7 @@ def start():
         try:
             stateMachine.run(drone, screen, eventList)
         except:
-            print("-- TRACKING FAILED --")
+            print("-- FAILURE IN DRONE STATE ", stateMachine.state.stateAsString, " --")
             drone._spd = 0
             stateMachine.forceExit()
             drone.turnOff()
