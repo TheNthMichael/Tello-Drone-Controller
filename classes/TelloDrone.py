@@ -4,7 +4,7 @@
 #       Drone connections and
 #       controls
 import cv2
-import numpy
+import numpy as np
 from djitellopy import Tello
 from Controller import Controller
 

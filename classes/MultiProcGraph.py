@@ -25,20 +25,21 @@ class DroneGraph:
         self.RXDataLoop()
 
     def RXDataLoop(self):
+        previousEstimatedPoses = None
         while True:
             try:
-                previousEstimatedPoses = q.get(True, 2.0)  # Wait a couple of seconds
+                previousEstimatedPoses = self.q.get(True, 2.0)  # Wait a couple of seconds
             except queue.Empty:
                 print("Data Not Received...\nClosing Grapher...")
                 sys.exit()
 
             self.ax.quiver(
-                previousEstimatedPoses["x"],
-                previousEstimatedPoses["y"],
-                previousEstimatedPoses["z"],
-                previousEstimatedPoses["u"],
-                previousEstimatedPoses["v"],
-                previousEstimatedPoses["w"],
+                previousEstimatedPoses["x"][-1],
+                previousEstimatedPoses["y"][-1],
+                previousEstimatedPoses["z"][-1],
+                previousEstimatedPoses["u"][-1],
+                previousEstimatedPoses["v"][-1],
+                previousEstimatedPoses["w"][-1],
                 color="b",
             )
             self.figure.canvas.draw()

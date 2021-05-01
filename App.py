@@ -18,10 +18,9 @@ def start():
     drone = TelloDrone()
     drone.changeVideoSize(720, 600)
     drone.connect()
-
-    print(drone.query_battery())
-
-    if drone.query_battery() < 10:
+    battery = drone.get_battery()
+    print("Battery:", battery)
+    if battery < 10:
         print("Error Battery Too Low...")
         raise Exception("Error Battery Too Low")
 

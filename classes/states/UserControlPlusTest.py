@@ -11,7 +11,7 @@ sys.path.append("../")
 from TelloDrone import TelloDrone
 from StateEnumeration import *
 from DroneState import DroneState
-from MultiProcGraph import StartGraph
+from MultiProcGraph import startGraph
 
 
 class UserControlPlusTest(DroneState):
@@ -19,9 +19,14 @@ class UserControlPlusTest(DroneState):
         super().__init__()
         self.stateAsString = "UserControlPlusTest"
         self.q = multiprocessing.Queue()
-        self.proc = multiprocessing.Process(None, plot, args=(q, title))
+        self.proc = multiprocessing.Process(None, startGraph, args=(self.q, "Slam plot"))
         self.proc.daemon = True
         self.proc.start()
+        self.speed = {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        }
         self.previousEstimatedPoses = {
             "x": [0],
             "y": [0],
@@ -49,24 +54,24 @@ class UserControlPlusTest(DroneState):
         self.FRAME = None
         """
         dt = droneData.FLIGHT_TIME - self.previousEstimatedPoses["t"][-1]
+        self.speed["x"] += droneData.ACC[0] * dt
+        self.speed["y"] += droneData.ACC[1] * dt
+        self.speed["z"] += droneData.ACC[2] * dt
         self.previousEstimatedPoses["x"].append(
             self.previousEstimatedPoses["x"][-1]
-            + droneData.SPD[0]
-            + (droneData.ACC[0] * dt * dt) / 2
+            + self.speed["x"] * dt
         )
         self.previousEstimatedPoses["x"].pop(0)
 
         self.previousEstimatedPoses["y"].append(
             self.previousEstimatedPoses["y"][-1]
-            + droneData.SPD[1]
-            + (droneData.ACC[1] * dt * dt) / 2
+            + self.speed["y"] * dt
         )
         self.previousEstimatedPoses["y"].pop(0)
 
         self.previousEstimatedPoses["z"].append(
             self.previousEstimatedPoses["z"][-1]
-            + droneData.SPD[2]
-            + (droneData.ACC[2] * dt * dt) / 2
+            + self.speed["z"] * dt
         )
         self.previousEstimatedPoses["z"].pop(0)
 
@@ -125,7 +130,7 @@ class UserControlPlusTest(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         cv2.putText(
             frame,
-            "In State UserControlPlusTest",
+            "In State UserControlPlusTest (Battery=" + str(data.BATTERY) + ")",
             (30, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
