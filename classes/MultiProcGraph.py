@@ -16,6 +16,15 @@ def startGraph(q, title):
 class DroneGraph:
     def __init__(self, q, title):
         super().__init__()
+        self.previousEstimatedPoses = {
+            "x": [0],
+            "y": [0],
+            "z": [0],
+            "u": [0],
+            "v": [0],
+            "w": [0],
+            "t": [0],
+        }
         self.q = q
         self.title = title
         self.figure = plt.figure()
@@ -28,18 +37,25 @@ class DroneGraph:
         previousEstimatedPoses = None
         while True:
             try:
-                previousEstimatedPoses = self.q.get(True, 2.0)  # Wait a couple of seconds
+                previousEstimatedPoses = self.q.get()  # Wait a couple of seconds
             except queue.Empty:
                 print("Data Not Received...\nClosing Grapher...")
                 sys.exit()
-
+            self.previousEstimatedPoses["x"].append(previousEstimatedPoses["x"][-1])
+            self.previousEstimatedPoses["y"].append(previousEstimatedPoses["y"][-1])
+            self.previousEstimatedPoses["z"].append(previousEstimatedPoses["z"][-1])
+            self.previousEstimatedPoses["u"].append(previousEstimatedPoses["u"][-1])
+            self.previousEstimatedPoses["v"].append(previousEstimatedPoses["v"][-1])
+            self.previousEstimatedPoses["w"].append(previousEstimatedPoses["w"][-1])
             self.ax.quiver(
-                previousEstimatedPoses["x"][-1],
-                previousEstimatedPoses["y"][-1],
-                previousEstimatedPoses["z"][-1],
-                previousEstimatedPoses["u"][-1],
-                previousEstimatedPoses["v"][-1],
-                previousEstimatedPoses["w"][-1],
+                self.previousEstimatedPoses["x"],
+                self.previousEstimatedPoses["y"],
+                self.previousEstimatedPoses["z"],
+                self.previousEstimatedPoses["u"],
+                self.previousEstimatedPoses["v"],
+                self.previousEstimatedPoses["w"],
+                length=25,
                 color="b",
             )
             self.figure.canvas.draw()
+            plt.pause(0.05)
