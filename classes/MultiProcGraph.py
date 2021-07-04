@@ -57,5 +57,8 @@ class DroneGraph:
                 length=25,
                 color="b",
             )
-            self.figure.canvas.draw()
-            plt.pause(0.05)
+            self.ax.set_xlabel('X axis')
+            self.ax.set_ylabel('Y axis')
+            self.ax.set_zlabel('Z axis')
+            plt.pause(0.001)
+            self.ax.cla()

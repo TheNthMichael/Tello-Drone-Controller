@@ -5,6 +5,7 @@
 #       controls
 import cv2
 import numpy as np
+import time
 from djitellopy import Tello
 from Controller import Controller
 
@@ -93,7 +94,7 @@ class TelloDrone(Tello, Controller):
         self._droneData.HEIGHT = self.get_height()
         self._droneData.BATTERY = self.get_battery()
         self._droneData.DIST_TOF = self.get_distance_tof()
-        self._droneData.FLIGHT_TIME = self.get_flight_time()
+        self._droneData.FLIGHT_TIME = time.time()
         # if we fail to get a new frame, use the old one
         tmp_frame = self._droneData.FRAME
         self._droneData.FRAME = self.getFrame()

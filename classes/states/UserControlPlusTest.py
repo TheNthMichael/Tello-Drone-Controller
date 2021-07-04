@@ -1,4 +1,4 @@
-import sys, threading, multiprocessing, queue, pygame
+import sys, pygame
 import cv2
 import math
 import numpy as np
@@ -11,31 +11,14 @@ sys.path.append("../")
 from TelloDrone import TelloDrone
 from StateEnumeration import *
 from DroneState import DroneState
-from MultiProcGraph import startGraph
+from DroneIPC import DroneIPC
 
 
 class UserControlPlusTest(DroneState):
     def __init__(self):
         super().__init__()
         self.stateAsString = "UserControlPlusTest"
-        self.q = multiprocessing.Queue()
-        self.proc = multiprocessing.Process(None, startGraph, args=(self.q, "Slam plot"))
-        self.proc.daemon = True
-        self.proc.start()
-        self.speed = {
-            "x": 0,
-            "y": 0,
-            "z": 0
-        }
-        self.previousEstimatedPoses = {
-            "x": [0],
-            "y": [0],
-            "z": [0],
-            "u": [0],
-            "v": [0],
-            "w": [0],
-            "t": [0],
-        }
+        self.ipc = DroneIPC('127.0.0.1', 5000, 4000)
 
     """
     Adds an estimated pose to previous poses based on drone sensor telemetry.
@@ -53,52 +36,20 @@ class UserControlPlusTest(DroneState):
         self.FLIGHT_TIME = 0
         self.FRAME = None
         """
-        dt = droneData.FLIGHT_TIME - self.previousEstimatedPoses["t"][-1]
-        self.speed["x"] += droneData.ACC[0] * dt
-        self.speed["y"] += droneData.ACC[1] * dt
-        self.speed["z"] += droneData.ACC[2] * dt
-        self.previousEstimatedPoses["x"].append(
-            self.previousEstimatedPoses["x"][-1]
-            + self.speed["x"] * dt
-        )
-        self.previousEstimatedPoses["x"].pop(0)
-
-        self.previousEstimatedPoses["y"].append(
-            self.previousEstimatedPoses["y"][-1]
-            + self.speed["y"] * dt
-        )
-        self.previousEstimatedPoses["y"].pop(0)
-
-        self.previousEstimatedPoses["z"].append(
-            self.previousEstimatedPoses["z"][-1]
-            + self.speed["z"] * dt
-        )
-        self.previousEstimatedPoses["z"].pop(0)
-
-        # convert rotation vector from degree to radian
-        droneData.ROTATION = (
-            math.radians(droneData.ROTATION[0]),
-            math.radians(droneData.ROTATION[1]),
-            math.radians(droneData.ROTATION[2]),
-        )
-        self.previousEstimatedPoses["u"].append(
-            math.sin(droneData.ROTATION[1]) * math.cos(droneData.ROTATION[2]),
-        )
-        self.previousEstimatedPoses["u"].pop(0)
-
-        self.previousEstimatedPoses["v"].append(
-            math.sin(droneData.ROTATION[1]) * math.sin(droneData.ROTATION[2]),
-        )
-        self.previousEstimatedPoses["v"].pop(0)
-
-        self.previousEstimatedPoses["w"].append(math.cos(droneData.ROTATION[2]))
-        self.previousEstimatedPoses["w"].pop(0)
-
-        self.previousEstimatedPoses["t"].append(droneData.FLIGHT_TIME)
-        self.previousEstimatedPoses["t"].pop(0)
+        # self.ipc.data = []
+        # DataFormat: 
+        #   [accx, accy, accz, du, dv, dw, t]
+        self.ipc.data = []
+        self.ipc.data.append(droneData.ACC[0])
+        self.ipc.data.append(droneData.ACC[1])
+        self.ipc.data.append(droneData.ACC[2])
+        self.ipc.data.append(math.sin(math.radians(droneData.ROTATION[0])) * math.cos(math.radians(droneData.ROTATION[2])))
+        self.ipc.data.append(math.sin(math.radians(droneData.ROTATION[1])) * math.sin(math.radians(droneData.ROTATION[2])))
+        self.ipc.data.append(math.cos(math.radians(droneData.ROTATION[2])))
+        self.ipc.data.append(droneData.FLIGHT_TIME)
 
     def drawPoses(self):
-        self.q.put(self.previousEstimatedPoses)
+        self.ipc.update()
 
     def action(self, drone, screen, eventList):
         for event in eventList:
@@ -130,7 +81,9 @@ class UserControlPlusTest(DroneState):
         frame = cv2.cvtColor(data.FRAME, cv2.COLOR_BGR2RGB)
         cv2.putText(
             frame,
-            "In State UserControlPlusTest (Battery=" + str(data.BATTERY) + ")",
+            """In State UserControlPlusTest (Battery=""" + str(data.BATTERY) + """)
+                Rotation = """ +  + """
+            """,
             (30, 30),
             cv2.FONT_HERSHEY_SIMPLEX,
             1,
